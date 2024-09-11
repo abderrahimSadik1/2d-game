@@ -13,16 +13,22 @@ public class Player extends Entity {
     GamePanel gp;
     KeyHandler keyH;
 
+    public final int screenX;
+    public final int screenY;
+
     public Player(GamePanel gp, KeyHandler keyH){
         this.gp = gp;
         this.keyH = keyH;
+
+        screenX = gp.maxScreenWidth/2 - gp.tileSize/2;
+        screenY = gp.maxScreenHeight/2 - gp.tileSize/2;
         setDefaultValues();
         getPlayerImage();
     }
 
     public void setDefaultValues(){
-        x = 100;
-        y = 100;
+        worldX = gp.tileSize;
+        worldY = gp.tileSize * 2;
         speed = 4;
         direction = "down";
     }
@@ -35,43 +41,56 @@ public class Player extends Entity {
         }
     }
 
+    public void frameUpdate(){
+        frameCounter++;
+        if (frameCounter > frameDelay) {
+            frameCounter = 0;
+            frameIndex = (frameIndex + 1) % totalFrames;
+        }
+    }
+
     public void update(){
-
-        if(keyH.up){
-            direction = "up";
-            y -= speed;
-        }
-        if(keyH.down){
-            direction = "down";
-            y += speed;
-        }
-        if(keyH.left){
-            direction = "left";
-            x -= speed;
-        }
-        if(keyH.right){
-            direction = "right";
-            x += speed;
-        }
-
+            if (keyH.up) {
+                direction = "up";
+                worldY -= speed;
+                frameUpdate();
+            }
+            else if (keyH.down) {
+                direction = "down";
+                worldY += speed;
+                frameUpdate();
+            }
+            else if (keyH.left) {
+                direction = "left";
+                worldX -= speed;
+                frameUpdate();
+            }
+            else if (keyH.right) {
+                direction = "right";
+                worldX += speed;
+                frameUpdate();
+            }else {
+                frameIndex = 1;
+            }
     }
 
     public void draw(Graphics2D g2){
         BufferedImage image = null;
+        int frameX = frameIndex * 32;
         switch(direction){
             case "up":
-                image = characterImages.getSubimage(32,96,32,32); // cutting only the wanted image
+                image = characterImages.getSubimage(frameX,96,32,32); // cutting only the wanted image
                 break;
             case "down":
-                image = characterImages.getSubimage(32,0,32,32);
+                image = characterImages.getSubimage(frameX,0,32,32);
                 break;
             case "left":
-                image = characterImages.getSubimage(32,32,32,32);
+                image = characterImages.getSubimage(frameX,32,32,32);
                 break;
             case "right":
-                image = characterImages.getSubimage(32,64,32,32);
+                image = characterImages.getSubimage(frameX,64,32,32);
                 break;
         }
-        g2.drawImage(image,x,y,gp.tileSize, gp.tileSize,null);
+        g2.drawImage(image,screenX,screenY,gp.tileSize, gp.tileSize,null);
     }
 }
