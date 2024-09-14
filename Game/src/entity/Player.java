@@ -20,6 +20,8 @@ public class Player extends Entity {
         this.gp = gp;
         this.keyH = keyH;
 
+        solidArea = new Rectangle(8,16,32,32);
+
         screenX = gp.maxScreenWidth/2 - gp.tileSize/2;
         screenY = gp.maxScreenHeight/2 - gp.tileSize/2;
         setDefaultValues();
@@ -27,8 +29,9 @@ public class Player extends Entity {
     }
 
     public void setDefaultValues(){
-        worldX = gp.tileSize;
-        worldY = gp.tileSize * 2;
+        // player spawn
+        worldX = gp.tileSize * 2;
+        worldY = gp.tileSize * 4;
         speed = 4;
         direction = "down";
     }
@@ -50,28 +53,44 @@ public class Player extends Entity {
     }
 
     public void update(){
+
+        if(keyH.up || keyH.down || keyH.left || keyH.right) {
             if (keyH.up) {
                 direction = "up";
-                worldY -= speed;
                 frameUpdate();
-            }
-            else if (keyH.down) {
+            } else if (keyH.down) {
                 direction = "down";
-                worldY += speed;
                 frameUpdate();
-            }
-            else if (keyH.left) {
+            } else if (keyH.left) {
                 direction = "left";
-                worldX -= speed;
                 frameUpdate();
-            }
-            else if (keyH.right) {
+            } else if (keyH.right) {
                 direction = "right";
-                worldX += speed;
                 frameUpdate();
-            }else {
-                frameIndex = 1;
             }
+            collisionOn = false;
+            gp.collisionChecker.checkTile(this);
+
+            if (!collisionOn) {
+                switch (direction) {
+                    case "up":
+                        worldY -= speed;
+                        break;
+                    case "left":
+                        worldX -= speed;
+                        break;
+                    case "right":
+                        worldX += speed;
+                        break;
+                    case "down":
+                        worldY += speed;
+                        break;
+                }
+            }
+        }else {
+            frameIndex = 1;
+        }
+
     }
 
     public void draw(Graphics2D g2){
